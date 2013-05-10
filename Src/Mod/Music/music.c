@@ -22,15 +22,13 @@ tCanvasWidget musicString3;
 tCanvasWidget musicString4;
 tCanvasWidget musicString5;
 
-static FATFS g_sFatFs;
-static FIL g_sFileObject;
+
+static FIL g_sFileObject1;
 
 
-unsigned char minute = 0;
-unsigned char second = 0;
-unsigned char micro_second = 0;
-int flag_decrease_delay = 0;
-int flag_increase_delay = 0;
+unsigned int minute = 0;
+unsigned int second = 0;
+unsigned int micro_second = 0;
 
 Canvas(
 	musicBackground,
@@ -199,35 +197,24 @@ int check_time_lyric(int mm, int ss, int micro_ss){
  * Input: * char name        
 **/
 void display_lyric(char * name_of_file){
-	int i,k,j = 0;
-	int time_pointer = 0;
-	int flag_time_detect = 0;
 	FRESULT fresult;
-	unsigned short usBytesRead;
-	char *var;
-	char str[2];
-	char time_detect[9];
-	char strDisplay[5][20];
-	int mm = 0;
-	int ss = 0;
-	int micro_ss = 0;
-	int flag_song_title = 0;
-	int delay_help = 85;
+	unsigned short usBytesRead = 0;
+	char str[2], time_detect[9], var[20], strDisplay[5][20];
+	int mm,ss,micro_ss,flag_song_title,i,k,j,time_pointer,flag_time_detect;
+	
 	str[1] = '\0';
-	
+	mm = ss = micro_ss = flag_song_title = i = k = j = time_pointer = flag_time_detect = 0;
 	sprintf(var, name_of_file);
-	
-	
 	WidgetPaint((tWidget *)&musicBackground);
 	WidgetMessageQueueProcess();
-
 	
-	fresult = f_open(&g_sFileObject, var, FA_READ);
+	fresult = f_open(&g_sFileObject1, var, FA_READ);
 	if(fresult != FR_OK)
 	{
 		UARTprintf("\n music 1.c\n");
 		return;
 	}
+	
 	while(1){
 		for(j = 0;j < 5; j++)
 			sprintf( strDisplay[j], "");
@@ -236,26 +223,26 @@ void display_lyric(char * name_of_file){
 		time_pointer = 0;
 		i = 0;
 		
-		// Read the first title of this song 
+// Read the first title of this song 
 		if (flag_song_title == 0){
 			flag_song_title = 1; 
 			do{
-				fresult = f_read(&g_sFileObject, str, 1, &usBytesRead);
+				fresult = f_read(&g_sFileObject1, str, 1, &usBytesRead);
 				strcat(strDisplay[0],str);	
 			}while (str[0] != '\n' && fresult == FR_OK && usBytesRead == 1);
 		sprintf( strDisplay[0], "");
 		}
 		
-		// Read content of lyric each sentences...
+// Read content of lyric each sentences...
 		do {
-			fresult = f_read(&g_sFileObject, str, 1, &usBytesRead);
+			fresult = f_read(&g_sFileObject1, str, 1, &usBytesRead);
 			if ((flag_time_detect) && (str[0] != ']') && (time_pointer <= 7)){
 				strcat(time_detect, str);
 				time_pointer++;
 			}
 			if (str[0] == '[') flag_time_detect = 1;
 			
-			// filter content of lyric without time
+// filter content of lyric without time
 			if (time_pointer >= 10){
 				strcat(strDisplay[i/19], str);
 				i++;
@@ -266,12 +253,13 @@ void display_lyric(char * name_of_file){
 		}while (str[0] != '\n' && fresult == FR_OK && usBytesRead == 1);	
 		if (usBytesRead < 1) break;
 
-		// check time terminated to display this lyric comment or not?
+// check time terminated to display this lyric comment or not?
 		mm = (time_detect[0] - 48)*10 + (time_detect[1] - 48);
 		ss = (time_detect[3] - 48)*10 + (time_detect[4] - 48);
 		micro_ss = (time_detect[6] - 48)*10 +(time_detect[7] - 48);
 		while(!check_time_lyric(mm, ss, micro_ss));
-		
+
+// display lyric one sentence and float on oled		
 		for (k = 0;k < 5; k++){
 			CanvasTextSet(&musicString1, strDisplay[k]);
 			if ((k-1) >= 0)
@@ -280,39 +268,23 @@ void display_lyric(char * name_of_file){
 				CanvasTextSet(&musicString3, strDisplay[k-2]);
 			if ((k-3) >= 0)
 				CanvasTextSet(&musicString4, strDisplay[k-3]);
-			if ((k-4) >=0)
+			if ((k-4) >= 0)
 				CanvasTextSet(&musicString5, strDisplay[k-4]);
-			
-			
 			WidgetPaint((tWidget *)&musicBackground);
 			WidgetMessageQueueProcess();
-			
-			
 			delay = delay_help ;
-			if (flag_decrease_delay){
-				delay_help-=10;
-				flag_decrease_delay = 0;
-			}
-			if (flag_increase_delay){
-				delay_help+=10;
-				flag_increase_delay = 0;
-			}
-			UARTprintf(" %d ",delay_help);
 			while (delay >0);
 		}
-		// clear all thing in olead LCD
+		
+// clear all thing in olead LCD
 		CanvasTextSet(&musicString1, "");
 		CanvasTextSet(&musicString2, "");
-		CanvasTextSet(&musicString3, "");
-		CanvasTextSet(&musicString4, "");
-		CanvasTextSet(&musicString5, "");
-		
-		
+		CanvasTextSet(&musicString3, "");	
+		CanvasTextSet(&musicString4, "");			
+		CanvasTextSet(&musicString5, "");	
 		WidgetPaint((tWidget *)&musicBackground);
-		WidgetMessageQueueProcess();
-		
-	}	
-		
+		WidgetMessageQueueProcess();	
+	}			
 }
 
 /* Function name: music
@@ -330,10 +302,8 @@ int music(void){
 		case CHOOSE_SONG:	
 		break;
 		
-		case PLAY_SONG_LYRIC:
-				UARTprintf("\n hehehhehehehehehehe\n");	
+		case PLAY_SONG_LYRIC:	
 				display_lyric("MAROON5.TXT");
-				while(1);
 		break;
 		
 		case WAITING:

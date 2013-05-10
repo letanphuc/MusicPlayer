@@ -116,7 +116,8 @@ void updateDisplayMenu(unsigned char mode){
  **/ 
 int menu(void){
 	unsigned int mode = MUSIC;
-	
+
+	UARTprintf("menu mode\n");
 	WidgetPaint((tWidget *)&menuBackground);
 	WidgetMessageQueueProcess();
 
@@ -127,11 +128,11 @@ int menu(void){
 		
 		if (SELECT)
 			return mode;
-		else if (LEFT){
+		else if (PREVIOUS){
 			if (mode == 1) mode = 3;
 			else mode--;
 		}
-		else if (RIGHT){
+		else if (NEXT){
 			if (mode == 3) mode = 1;
 			else mode++;
 		}

@@ -20,8 +20,8 @@
 #include "fatfs/src/ff.h"
 #include "fatfs/src/diskio.h"
 
-extern unsigned char minute , second ,micro_second;
-extern int flag_decrease_delay, flag_increase_delay;
+extern unsigned int minute , second ,micro_second;
+
 
 #define CHOOSE_SONG     0
 #define PLAY_SONG_LYRIC 1

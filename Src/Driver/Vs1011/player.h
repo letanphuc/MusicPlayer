@@ -16,7 +16,6 @@
 
 #include "../../musicplayer.h"
 
-static FATFS g_sFatFs;
 
 /* prototype */
 

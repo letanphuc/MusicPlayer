@@ -71,6 +71,7 @@
 #include "grlib/widget.h"
 #include "grlib/canvas.h"
 #include "grlib/grlib.h"
+#include "grlib/listbox.h"
 
 #include "drivers/buttons.h"
 #include "drivers/class-d.h"
@@ -97,11 +98,41 @@
 #define SUCCESSFULL	0
 #define FAIL		1
 
+typedef struct{
+	unsigned char hour;
+	unsigned char minute;
+	unsigned char second;
+	unsigned int milisecond;
+} Time;
+
+typedef struct{
+	unsigned char isOn;
+	Time timeSet;
+} Alarm;
+typedef struct{
+	enum{
+		MON,	// 0
+		TUE,	// 1
+		WES,	// 2
+		THU,	// 3
+		FRI,	// 4
+		SAT,	// 5
+		SUN		// 6
+	} dayOfWeek;
+	unsigned char date;
+	unsigned char month;
+	unsigned int year;
+} Date;
+
 
 extern unsigned char count;
 extern unsigned char count1;
 extern unsigned int delay;
+extern unsigned int delay_help;
 extern unsigned char button;
+extern Time currentTime;
+extern Alarm alarm;
+extern Date date;
 
 #define UP_INDEX 		0
 #define DOWN_INDEX 		1
@@ -110,13 +141,24 @@ extern unsigned char button;
 #define SELECT_INDEX 	4
 
 
+/*
 #define UP 			button&(1<<UP_INDEX)
 #define DOWN 		button&(1<<DOWN_INDEX)
 #define LEFT 		button&(1<<LEFT_INDEX)
 #define RIGHT 		button&(1<<RIGHT_INDEX)
 #define SELECT 		button&(1<<SELECT_INDEX)
+*/
+
+#define NEXT 			button&(1<<UP_INDEX)
+#define PREVIOUS 		button&(1<<DOWN_INDEX)
+#define BACK 			button&(1<<LEFT_INDEX)
+#define SELECT 			button&(1<<RIGHT_INDEX)
+#define HOME 			button&(1<<SELECT_INDEX)
+
+
 #define BUTTON_IS_PRESSED 	button
 #define waitButton() 		while(!button)
+#define clearButton()		{button = 0;}
 
 
 #endif
